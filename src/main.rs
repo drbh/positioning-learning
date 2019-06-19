@@ -1,18 +1,10 @@
 use serde_json::json;
 
-#[derive(Debug, Clone, Copy)]
-struct Beacon {
-    x: f64,
-    y: f64,
-    time: i64,
-}
+mod position;
 
-#[derive(Debug)]
-struct Reciever {
-    x: f64,
-    y: f64,
-    time: i64,
-}
+use crate::position::*;
+
+const LIGHTSPEED: f64 = 299792458.0;
 
 fn main() {
     // init the beacons!
@@ -33,82 +25,60 @@ fn main() {
     };
 
     // this reciever doesn't know where they are
-    let recp = Reciever {
+    let _recp = Reciever {
         x: 3.0,
         y: 3.0,
         time: 1,
     };
 
-    // number of loops around the circle
-    let n = 1000;
-    let k = (2.0 * std::f64::consts::PI) / n as f64;
-    let error_margin = 0.001;
-    let error_margin_two = 0.03;
+    let time_from_beacon_1_to_reciver = 0.000000026685128;
+    let time_from_beacon_2_to_reciver = 0.000000326892813;
+    let time_from_beacon_3_to_reciver = 0.000000056705896;
 
-    // setup a counter and bool for early 'break'
-    let mut counter = 0;
-    let mut didfind = false;
-
-    let mut results = std::collections::HashMap::new();
-
-    // loop over the circle segments
-    for i in 1..n {
-        // get the x, y of the circle at that point
-        let rad = k * i as f64;
-        let v = 8.0 as f64;
-        let b1 = beac1.parametric(v.sqrt(), rad);
-
-        // now we are going to look for any matches with the second circle
-        for i in 1..n {
-            let rad = k * i as f64;
-            let v = 98.0 as f64;
-            let b2 = beac2.parametric(v.sqrt(), rad);
-            if (b1.0 - b2.0).abs() < error_margin {
-                if (b1.1 - b2.1).abs() < error_margin {
-                    results.insert("A", b1);
-                    results.insert("B", b2);
-                    didfind = true;
-
-                    break;
-                }
-            }
-
-            counter += 1;
-        }
-        if didfind {
-            break;
-        }
-    }
-
-    for l in 1..n {
-        let rad = k * l as f64;
-        let v = 17.0 as f64;
-        let b3 = beac3.parametric(v.sqrt(), rad);
-        let b2 = results.get("A").unwrap();
-        if (b3.0 - b2.0).abs() < error_margin {
-            // println!("\n{} {} {:?} {}", l, v, b2, (b3.0 - b2.0).abs());
-            // println!("{} {} {:?} {}", l, v, b2, (b3.1 - b2.1).abs());
-            if (b3.1 - b2.1).abs() < error_margin_two {
-                results.insert("C", b3);
-                // println!("C {:?}", b3);
-                break;
-            }
-        }
-        counter += 1;
-    }
+    let results = trilaterate_from_distance(
+        beac1,
+        beac2,
+        beac3,
+        time_from_beacon_1_to_reciver * LIGHTSPEED,
+        time_from_beacon_2_to_reciver * LIGHTSPEED,
+        time_from_beacon_3_to_reciver * LIGHTSPEED,
+    );
+    // let results = trilaterate_from_distance(beac1, beac2, beac3, 8.0, 98.0, 17.0);
 
     let _json = json!(results);
-    println!("Result");
 
     println!("{}", serde_json::to_string_pretty(&_json).unwrap());
 
-    // println!("counter {}", counter);
+    let f = 2442.0; //mhz (7'th 802.11bgn channel),
+
+    let ptx = 16.0; //dbm,
+    let cltx = 0.0; //,
+    let agtx = 2.0; //dbi,
+    let agrx = 0.0; //,
+    let clrx = 0.0;
+    let prx = -60.0; //dbm (received signal strength),
+    let fm = 22.0;
+
+    let res = wifi_strength_to_meters(f, ptx, cltx, agtx, agrx, clrx, prx, fm);
+    println!("{:?}", res);
+
+    // println!("_counter {}", _counter);
 }
 
-impl Beacon {
-    fn parametric(self: Self, r: f64, a: f64) -> (f64, f64) {
-        let x = self.x + r * a.cos();
-        let y = self.y + r * a.sin();
-        (x, y)
-    }
+fn wifi_strength_to_meters(
+    f: f64,
+    ptx: f64,
+    cltx: f64,
+    agtx: f64,
+    agrx: f64,
+    clrx: f64,
+    prx: f64,
+    fm: f64,
+) -> f64 {
+    // based on https://stackoverflow.com/a/27238116
+    // let k = 32.44;
+    let k = -27.55;
+    let fspl = ptx - cltx + agtx + agrx - clrx - prx - fm;
+    let d = (10.0 as f64).powf((fspl - k - 20.0 * f.log10()) / 20.0);
+    d
 }
