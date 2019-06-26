@@ -11,6 +11,26 @@ So this repo is really just a scratchpad for some of the math used in GPS writte
 In order to wrap my head around the math of trilateration - I had a quick flashback to high school tri. Sin Cos? Tan? remember those things. Well they finally became useful.
 
 
+## What is this magic?
+
+![images/world.png](distance.png)
+
+
+## Located by circles
+
+![images/overlaping.png](distance.png)
+
+
+## So, how far?
+
+![images/distance.png](distance.png)
+
+
+## Sound into distance
+
+![images/sound-waves.png](distance.png)
+
+
 ### The concept
 
 We need three points that emit a message at a set interval - this message contains the beacons current location and the current time

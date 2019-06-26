@@ -35,8 +35,8 @@ pub fn trilaterate_from_distance(
     // number of loops around the circle
     let n = 1000;
     let k = (2.0 * std::f64::consts::PI) / n as f64;
-    let error_margin = 0.0001;
-    let error_margin_two = 0.003;
+    let error_margin = 0.001;
+    let error_margin_two = 0.03;
 
     // setup a _counter and bool for early 'break'
     let mut _counter = 0;
@@ -49,13 +49,13 @@ pub fn trilaterate_from_distance(
         // get the x, y of the circle at that point
         let rad = k * i as f64;
         let v = distance1;
-        let b1 = beac1.parametric(v.sqrt(), rad);
+        let b1 = beac1.parametric(v, rad);
 
         // now we are going to look for any matches with the second circle
         for i in 1..n {
             let rad = k * i as f64;
             let v = distance2;
-            let b2 = beac2.parametric(v.sqrt(), rad);
+            let b2 = beac2.parametric(v, rad);
             if (b1.0 - b2.0).abs() < error_margin {
                 if (b1.1 - b2.1).abs() < error_margin {
                     results.insert("A", b1);
@@ -76,7 +76,7 @@ pub fn trilaterate_from_distance(
     for l in 1..n {
         let rad = k * l as f64;
         let v = distance3;
-        let b3 = beac3.parametric(v.sqrt(), rad);
+        let b3 = beac3.parametric(v, rad);
         let b2 = results.get("A").unwrap();
         if (b3.0 - b2.0).abs() < error_margin {
             // println!("\n{} {} {:?} {}", l, v, b2, (b3.0 - b2.0).abs());
