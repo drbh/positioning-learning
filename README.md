@@ -15,20 +15,20 @@ In order to wrap my head around the math of trilateration - I had a quick flashb
 
 Okay so how does this trickery work? Basically if we know where 3 points are, and we know our distance to those points we can figure out our position!
 
-![images/world.png](images/distance.png)
+<img src="images/world.png" height="300px"/>
 
 ## Located by circles
 
 Just knowing the distance does not point us to the exact location. But using the distance to draw circles around the beacons we can point the exact location by finding the point where all 3 circles overlap. 
 
-![images/overlaping.png](images/distance.png)
+<img src="images/overlaping.png" height="300px"/>
 
 
 ## So, how far?
 
 Simply - the circles represent possible locations of that distance from the beacon, and we want to find the precise location associated with the distances we know.
 
-![images/distance.](images/distance.png)
+<img src="images/distance.png" height="300px"/>
 
 
 ## Sound into distance
@@ -37,7 +37,7 @@ Okay awesome - we see how using three distances from three beacons can locate us
 
 We use radio waves and time. If you know the speed and delivery time of a message - we can determine the distance it traveled.
 
-![images/sound-waves.png](images/sound-waves.png)
+<img src="images/sound-waves.png" height="300px"/>
 
 
 ### The concept
